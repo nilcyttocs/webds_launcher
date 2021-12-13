@@ -52,7 +52,7 @@ import { webdsIcon } from './icons';
 /**
  * Extension identifier
  */
-export const EXTENSION_ID = 'webds_launcher:plugin';
+export const EXTENSION_ID = '@webds/launcher:plugin';
 
 /**
  * The class name added to Launcher instances.
