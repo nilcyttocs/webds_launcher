@@ -49,8 +49,6 @@
     "@jupyterlab/apputils": "^3.1.16",
     "@jupyterlab/launcher": "^3.1.16",
     "@jupyterlab/settingregistry": "^3.1.16",
-    "@jupyterlab/statedb": "^3.1.16",
-    "@jupyterlab/translation": "^3.1.16",
     "@jupyterlab/ui-components": "^3.1.16",
     "@lumino/algorithm": "^1.8.0",
     "@lumino/commands": "^1.17.0",
