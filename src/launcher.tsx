@@ -175,7 +175,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
         return;
       }
 
-      const webds = cat === 'WebDS';
+      const webds = cat.startsWith('WebDS');
       const kernel = cat === 'IPython';
       const item = categories[cat][0][0];
       const command = item.command;

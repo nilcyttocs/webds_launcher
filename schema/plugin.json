@@ -14,7 +14,7 @@
     "categories": {
       "title": "Launcher categories in displayed order",
       "description": "Absent categories will be appended.",
-      "default": ["IPython", "WebDS", "Other"],
+      "default": ["IPython", "WebDS", "WebDS - Exploration", "Other"],
       "type": "array",
       "items": {
         "type": "string"
