@@ -14,7 +14,7 @@
     "categories": {
       "title": "Launcher categories in displayed order",
       "description": "Absent categories will be appended.",
-      "default": ["IPython", "WebDS", "WebDS - Exploration", "WebDS - Tutors", "WebDS - Testing", "Other"],
+      "default": ["IPython", "WebDS", "WebDS - Exploration", "WebDS - Tuning", "WebDS - Testing", "Other"],
       "type": "array",
       "items": {
         "type": "string"
