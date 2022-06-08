@@ -29,6 +29,30 @@ namespace Private {
   export let id = 0;
 }
 
+let webdsLauncher: any;
+let webdsLauncherBody: any;
+let isScrolling = false;
+
+function setShadows(event: any) {
+  if (!isScrolling) {
+    window.requestAnimationFrame(function () {
+      if (event.target.scrollTop > 0) {
+        webdsLauncher.classList.add("off-top");
+      } else {
+        webdsLauncher.classList.remove("off-top");
+      }
+      if (Math.abs(event.target.scrollHeight - event.target.clientHeight - event.target.scrollTop) > 3
+) {
+  webdsLauncher.classList.add("off-bottom");
+      } else {
+        webdsLauncher.classList.remove("off-bottom");
+      }
+      isScrolling = false;
+    });
+    isScrolling = true;
+  }
+}
+
 const EXTENSION_ID = '@webds/launcher:plugin';
 
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
@@ -69,6 +93,7 @@ async function activate(
       };
 
       const launcher = new Launcher({commands, model, cwd, callback});
+      launcher.id = "webds-launcher";
       launcher.model = model;
       launcher.title.label = 'Launcher';
       launcher.title.icon = launcherIcon;
@@ -84,6 +109,15 @@ async function activate(
           main.title.closable = toArray(labShell.widgets('main')).length > 1;
         }, main);
       }
+
+      webdsLauncher = document.getElementById("webds-launcher");
+      webdsLauncherBody = document.querySelector(".jp-webdsLauncher-body");
+      webdsLauncherBody.addEventListener("scroll", setShadows);
+      setTimeout(function(){
+        if (webdsLauncherBody.scrollHeight > webdsLauncherBody.clientHeight) {
+          webdsLauncher.classList.add("off-bottom");
+        }
+      }, 0);
 
       return main;
     }

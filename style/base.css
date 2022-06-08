@@ -19,11 +19,31 @@
   box-sizing: border-box;
   min-width: 120px;
   min-height: 120px;
+  overflow: hidden;
+  position: relative;
   margin: 0;
   padding: 0;
   outline: none;
   background: var(--jp-layout-color0);
   font-size: var(--jp-ui-font-size1);
+}
+
+.jp-webdsLauncher-shadow {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  pointer-events: none;
+  transition: all 0.2s ease-out;
+}
+
+.jp-webdsLauncher.off-top .jp-webdsLauncher-shadow-top {
+  box-shadow: 0 1em 1em -1em black inset;
+}
+
+.jp-webdsLauncher.off-bottom .jp-webdsLauncher-shadow-bottom {
+  box-shadow: 0 -1em 1em -1em black inset;
 }
 
 .jp-webdsLauncher-body {

@@ -229,12 +229,16 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     });
 
     return (
-      <div className="jp-webdsLauncher-body">
-        <div className="jp-webdsLauncher-content">
-          <div className="jp-webdsLauncher-content-float">{floats}</div>
-          <div className="jp-webdsLauncher-content-main">{sections}</div>
+      <>
+        <div className="jp-webdsLauncher-body">
+          <div className="jp-webdsLauncher-content">
+            <div className="jp-webdsLauncher-content-float">{floats}</div>
+            <div className="jp-webdsLauncher-content-main">{sections}</div>
+          </div>
         </div>
-      </div>
+        <div className="jp-webdsLauncher-shadow jp-webdsLauncher-shadow-top"></div>
+        <div className="jp-webdsLauncher-shadow jp-webdsLauncher-shadow-bottom"></div>
+      </>
     );
   }
 
