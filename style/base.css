@@ -39,11 +39,11 @@
 }
 
 .jp-webdsLauncher.off-top .jp-webdsLauncher-shadow-top {
-  box-shadow: 0 1em 1em -1em black inset;
+  box-shadow: 0 1.2em 1em -1em grey inset;
 }
 
 .jp-webdsLauncher.off-bottom .jp-webdsLauncher-shadow-bottom {
-  box-shadow: 0 -1em 1em -1em black inset;
+  box-shadow: 0 -1.2em 1em -1em grey inset;
 }
 
 .jp-webdsLauncher-body {
