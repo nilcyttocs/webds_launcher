@@ -2,26 +2,26 @@ import {
   ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+} from "@jupyterlab/application";
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
+import { MainAreaWidget } from "@jupyterlab/apputils";
 
-import { ILauncher } from '@jupyterlab/launcher';
+import { ILauncher } from "@jupyterlab/launcher";
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ISettingRegistry } from "@jupyterlab/settingregistry";
 
-import { launcherIcon } from '@jupyterlab/ui-components';
+import { launcherIcon } from "@jupyterlab/ui-components";
 
-import { toArray } from '@lumino/algorithm';
+import { toArray } from "@lumino/algorithm";
 
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { ReadonlyPartialJSONObject } from "@lumino/coreutils";
 
-import { Widget } from '@lumino/widgets';
+import { Widget } from "@lumino/widgets";
 
-import { Launcher, LauncherModel } from './launcher';
+import { Launcher, LauncherModel } from "./launcher";
 
 namespace CommandIDs {
-  export const create = 'launcher:create';
+  export const create = "launcher:create";
 }
 
 namespace Private {
@@ -41,9 +41,14 @@ function setShadows(event: any) {
       } else {
         webdsLauncher.classList.remove("off-top");
       }
-      if (Math.abs(event.target.scrollHeight - event.target.clientHeight - event.target.scrollTop) > 3
-) {
-  webdsLauncher.classList.add("off-bottom");
+      if (
+        Math.abs(
+          event.target.scrollHeight -
+            event.target.clientHeight -
+            event.target.scrollTop
+        ) > 3
+      ) {
+        webdsLauncher.classList.add("off-bottom");
       } else {
         webdsLauncher.classList.remove("off-bottom");
       }
@@ -53,7 +58,7 @@ function setShadows(event: any) {
   }
 }
 
-const EXTENSION_ID = '@webds/launcher:plugin';
+const EXTENSION_ID = "@webds/launcher:plugin";
 
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   id: EXTENSION_ID,
@@ -66,11 +71,11 @@ const plugin: JupyterFrontEndPlugin<ILauncher> = {
 async function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell | null,
-  settingRegistry: ISettingRegistry | null,
+  settingRegistry: ISettingRegistry | null
 ): Promise<ILauncher> {
-  console.log('JupyterLab extension @webds/launcher is activated!');
+  console.log("JupyterLab extension @webds/launcher is activated!");
 
-  const {commands, shell} = app;
+  const { commands, shell } = app;
 
   let settings: ISettingRegistry.ISettings | undefined = undefined;
   if (settingRegistry) {
@@ -84,36 +89,36 @@ async function activate(
   const model = new LauncherModel(settings);
 
   commands.addCommand(CommandIDs.create, {
-    label: 'WebDS Launcher',
+    label: "WebDS Launcher",
     execute: (args: ReadonlyPartialJSONObject) => {
       const id = `launcher-${Private.id++}`;
-      const cwd = args['cwd'] ? String(args['cwd']) : '';
+      const cwd = args["cwd"] ? String(args["cwd"]) : "";
       const callback = (item: Widget): void => {
-        shell.add(item, 'main', {ref: id});
+        shell.add(item, "main", { ref: id });
       };
 
-      const launcher = new Launcher({commands, model, cwd, callback});
+      const launcher = new Launcher({ commands, model, cwd, callback });
       launcher.id = "webds-launcher";
       launcher.model = model;
-      launcher.title.label = 'Launcher';
+      launcher.title.label = "Launcher";
       launcher.title.icon = launcherIcon;
 
-      const main = new MainAreaWidget<Launcher>({content: launcher});
+      const main = new MainAreaWidget<Launcher>({ content: launcher });
       main.id = id;
-      main.title.closable = !!toArray(shell.widgets('main')).length;
+      main.title.closable = !!toArray(shell.widgets("main")).length;
 
-      shell.add(main, 'main', {activate: args['activate'] as boolean});
+      shell.add(main, "main", { activate: args["activate"] as boolean });
 
       if (labShell) {
         labShell.layoutModified.connect(() => {
-          main.title.closable = toArray(labShell.widgets('main')).length > 1;
+          main.title.closable = toArray(labShell.widgets("main")).length > 1;
         }, main);
       }
 
       webdsLauncher = document.getElementById("webds-launcher");
       webdsLauncherBody = document.querySelector(".jp-webdsLauncher-body");
       webdsLauncherBody.addEventListener("scroll", setShadows);
-      setTimeout(function(){
+      setTimeout(function () {
         if (webdsLauncherBody.scrollHeight > webdsLauncherBody.clientHeight) {
           webdsLauncher.classList.add("off-bottom");
         }
