@@ -18,6 +18,8 @@ import { ReadonlyPartialJSONObject } from "@lumino/coreutils";
 
 import { Widget } from "@lumino/widgets";
 
+import { WebDSService } from "@webds/service";
+
 import { Launcher, LauncherModel } from "./launcher";
 
 namespace CommandIDs {
@@ -63,7 +65,7 @@ const EXTENSION_ID = "@webds/launcher:plugin";
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   id: EXTENSION_ID,
   autoStart: true,
-  optional: [ILabShell, ISettingRegistry],
+  optional: [ILabShell, ISettingRegistry, WebDSService],
   provides: ILauncher,
   activate
 };
@@ -71,7 +73,8 @@ const plugin: JupyterFrontEndPlugin<ILauncher> = {
 async function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell | null,
-  settingRegistry: ISettingRegistry | null
+  settingRegistry: ISettingRegistry | null,
+  service: WebDSService | null
 ): Promise<ILauncher> {
   console.log("JupyterLab extension @webds/launcher is activated!");
 
@@ -97,7 +100,10 @@ async function activate(
         shell.add(item, "main", { ref: id });
       };
 
-      const launcher = new Launcher({ commands, model, cwd, callback });
+      const launcher = new Launcher(
+        { commands, model, cwd, callback },
+        service
+      );
       launcher.id = "webds-launcher";
       launcher.model = model;
       launcher.title.label = "Launcher";

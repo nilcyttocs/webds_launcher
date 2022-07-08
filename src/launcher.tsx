@@ -1,4 +1,5 @@
 /* eslint-disable no-inner-declarations */
+import * as React from "react";
 
 import { VDomModel, VDomRenderer } from "@jupyterlab/apputils";
 
@@ -27,13 +28,16 @@ import { AttachedProperty } from "@lumino/properties";
 
 import { Widget } from "@lumino/widgets";
 
-import * as React from "react";
+import { OSInfo, WebDSService } from "@webds/service";
 
 import { webdsIcon } from "./icons";
 
 const LAUNCHER_CLASS = "jp-webdsLauncher";
 
 const KERNEL_CATEGORIES = ["Notebook", "Console"];
+
+let webdsService: WebDSService | null;
+let updateAvailable = false;
 
 export class LauncherModel extends VDomModel implements ILauncher {
   constructor(settings?: ISettingRegistry.ISettings) {
@@ -71,12 +75,13 @@ export class LauncherModel extends VDomModel implements ILauncher {
 }
 
 export class Launcher extends VDomRenderer<LauncherModel> {
-  constructor(options: INewLauncher.IOptions) {
+  constructor(options: INewLauncher.IOptions, service: WebDSService | null) {
     super(options.model);
     this._commands = options.commands;
     this._cwd = options.cwd;
     this._callback = options.callback;
     this.addClass(LAUNCHER_CLASS);
+    webdsService = service;
   }
 
   get cwd(): string {
@@ -97,6 +102,11 @@ export class Launcher extends VDomRenderer<LauncherModel> {
   protected render(): React.ReactElement<any> | null {
     if (!this.model) {
       return null;
+    }
+
+    if (webdsService) {
+      const osInfo: OSInfo = webdsService.pinormos.getOSInfo();
+      updateAvailable = osInfo.repo.version > osInfo.current.version;
     }
 
     const categories: {
@@ -371,12 +381,14 @@ function Card(
   return (
     <div
       className={`jp-webdsLauncher-card${_other}`}
+      id={`webds-launcher-card-${label.replace(/ /g, "-")}`}
       key={Private.keyProperty.get(item)}
       title={title}
       data-category={item.category || "Other"}
       onClick={mainOnClick}
       onKeyPress={onkeypress}
       tabIndex={100}
+      style={{ position: "relative" }}
     >
       <div className={`jp-webdsLauncher-icon${_other}`}>
         <LabIcon.resolveReact
@@ -388,6 +400,20 @@ function Card(
       <div className={`jp-webdsLauncher-label${_other}`} title={label}>
         {label}
       </div>
+      {updateAvailable && label === "DSDK Update" && (
+        <div
+          id={"webds-launcher-card-DSDK-Update-Red-Dot"}
+          style={{
+            width: "10px",
+            height: "10px",
+            backgroundColor: "red",
+            borderRadius: "50%",
+            position: "absolute",
+            top: "5px",
+            right: "5px"
+          }}
+        />
+      )}
     </div>
   );
 }
