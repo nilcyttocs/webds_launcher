@@ -113,7 +113,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       [category: string]: ILauncher.IItemOptions[][];
     } = Object.create(null);
 
-    each(this.model.items(), (item, index) => {
+    each(this.model.items(), (item) => {
       const cat = item.category || "Other";
       if (!(cat in categories)) {
         categories[cat] = [];
@@ -158,7 +158,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
         kernels.push(console_);
       }
     });
-    categories["IPython"] = kernels;
+    categories["Touch - Development"] = kernels;
 
     for (const cat in categories) {
       categories[cat] = categories[cat].sort(
@@ -168,8 +168,16 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       );
     }
 
+    const others = categories["Other"];
+    if (others) {
+      delete categories["Other"];
+    }
+    categories["Touch - Development"] = categories[
+      "Touch - Development"
+    ].concat(others);
+
     const orderedCategories: string[] = [];
-    each(this.model.categories, (cat, index) => {
+    each(this.model.categories, (cat) => {
       if (cat in categories) {
         orderedCategories.push(cat);
       }
@@ -177,13 +185,12 @@ export class Launcher extends VDomRenderer<LauncherModel> {
 
     for (const cat in categories) {
       if (this.model.categories.indexOf(cat) === -1) {
-        if (cat !== "WebDS_Documentation") {
+        if (cat !== "Touch - Manual Config" && cat !== "DSDK - Documentation") {
           orderedCategories.push(cat);
         }
       }
     }
 
-    const floats: React.ReactElement<any>[] = [];
     const sections: React.ReactElement<any>[] = [];
 
     orderedCategories.forEach((cat) => {
@@ -191,60 +198,28 @@ export class Launcher extends VDomRenderer<LauncherModel> {
         return;
       }
 
-      const webds = cat.startsWith("WebDS");
-      const kernel = cat === "IPython";
-      const item = categories[cat][0][0];
-      const command = item.command;
-      const args = { ...item.args, cwd: this.cwd };
-
-      const iconClass = this._commands.iconClass(command, args);
-      const icon_ = this._commands.icon(command, args);
-      const icon = icon_ === iconClass ? undefined : icon_;
-
-      const _kernel = kernel ? "-kernel" : "";
-
       const section = (
-        <div className={`jp-webdsLauncher-section${_kernel}`} key={cat}>
+        <div className="jp-webdsLauncher-section" key={cat}>
           <div className="jp-webdsLauncher-section-header">
-            {webds ? (
-              <webdsIcon.react stylesheet="launcherSection" />
-            ) : (
-              <LabIcon.resolveReact
-                icon={icon}
-                iconClass={classes(iconClass, "jp-Icon-cover")}
-                stylesheet="launcherSection"
-              />
-            )}
+            <webdsIcon.react stylesheet="launcherSection" />
             <h2 className="jp-webdsLauncher-section-title">{cat}</h2>
           </div>
-          <div className={`jp-webdsLauncher-card-container`}>
+          <div className="jp-webdsLauncher-card-container">
             {toArray(
               map(categories[cat], (items: ILauncher.IItemOptions[]) => {
-                return Card(
-                  webds,
-                  kernel,
-                  items,
-                  this,
-                  this._commands,
-                  this._callback
-                );
+                return Card(items, this, this._commands, this._callback);
               })
             )}
           </div>
         </div>
       );
-      if (kernel) {
-        floats.push(section);
-      } else {
-        sections.push(section);
-      }
+      sections.push(section);
     });
 
     return (
       <>
         <div className="jp-webdsLauncher-body">
           <div className="jp-webdsLauncher-content">
-            <div className="jp-webdsLauncher-content-float">{floats}</div>
             <div className="jp-webdsLauncher-content-main">{sections}</div>
           </div>
         </div>
@@ -270,8 +245,6 @@ export namespace INewLauncher {
 }
 
 function Card(
-  webds: boolean,
-  kernel: boolean,
   items: ILauncher.IItemOptions[],
   launcher: Launcher,
   commands: CommandRegistry,
@@ -280,9 +253,8 @@ function Card(
   const item = items[0];
   const command = item.command;
   const args = { ...item.args, cwd: launcher.cwd };
-  const caption = commands.caption(command, args);
   const label = commands.label(command, args);
-  const title = kernel ? label : caption || label;
+  const caption = items.length > 1 ? label : commands.caption(command, args);
 
   const onClickFactory = (
     item: ILauncher.IItemOptions
@@ -346,60 +318,38 @@ function Card(
   const icon_ = commands.icon(command, args);
   const icon = icon_ === iconClass ? undefined : icon_;
 
-  const _other = webds || kernel ? "" : "-other";
-
   // Return the VDOM element.
-  if (kernel) {
-    return (
-      <div
-        className={`jp-webdsLauncher-card`}
-        key={Private.keyProperty.get(item)}
-        title={title}
-        data-category={item.category || "Other"}
-        onClick={mainOnClick}
-        onKeyPress={onkeypress}
-        tabIndex={100}
-      >
-        <div className={`jp-webdsLauncher-icon`}>
-          {item.kernelIconUrl ? (
-            <img
-              className="jp-webdsLauncher-icon-kernel"
-              src={item.kernelIconUrl}
-            />
-          ) : (
-            <div>{label[0].toUpperCase()}</div>
-          )}
-        </div>
-        <div className={`jp-webdsLauncher-label`} title={label}>
-          {label}
-        </div>
-        <div className="jp-webdsLauncher-options">{getOptions(items)}</div>
-      </div>
-    );
-  }
-
   return (
     <div
-      className={`jp-webdsLauncher-card${_other}`}
+      className="jp-webdsLauncher-card"
       id={`webds-launcher-card-${label.replace(/ /g, "-")}`}
       key={Private.keyProperty.get(item)}
-      title={title}
-      data-category={item.category || "Other"}
+      title={caption}
       onClick={mainOnClick}
       onKeyPress={onkeypress}
       tabIndex={100}
       style={{ position: "relative" }}
     >
-      <div className={`jp-webdsLauncher-icon${_other}`}>
-        <LabIcon.resolveReact
-          icon={icon}
-          iconClass={classes(iconClass, "jp-Icon-cover")}
-          stylesheet="launcherCard"
-        />
+      <div className="jp-webdsLauncher-icon">
+        {item.kernelIconUrl ? (
+          <img
+            className="jp-webdsLauncher-icon-kernel"
+            src={item.kernelIconUrl}
+          />
+        ) : (
+          <LabIcon.resolveReact
+            icon={icon}
+            iconClass={classes(iconClass, "jp-Icon-cover")}
+            stylesheet="launcherCard"
+          />
+        )}
       </div>
-      <div className={`jp-webdsLauncher-label${_other}`} title={label}>
+      <div className="jp-webdsLauncher-label" title={label}>
         {label}
       </div>
+      {items.length > 1 && (
+        <div className="jp-webdsLauncher-options">{getOptions(items)}</div>
+      )}
       {updateAvailable && label === "DSDK Update" && (
         <div
           id={"webds-launcher-card-DSDK-Update-Red-Dot"}

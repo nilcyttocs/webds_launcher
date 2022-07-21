@@ -14,7 +14,12 @@
     "categories": {
       "title": "Launcher categories in displayed order",
       "description": "Absent categories will be appended.",
-      "default": ["IPython", "WebDS", "WebDS - Exploration", "WebDS - Tuning", "WebDS - Testing", "Other"],
+      "default": ["Touch - Assessment",
+                  "Touch - Configuration",
+                  "Touch - Bootstrapping",
+                  "Touch - Development",
+                  "DSDK - Application",
+                  "Other"],
       "type": "array",
       "items": {
         "type": "string"

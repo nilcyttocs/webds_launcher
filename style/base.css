@@ -64,11 +64,6 @@
   padding-right: var(--jp-private-webds-launcher-side-padding);
 }
 
-.jp-webdsLauncher-content-float {
-  float: left;
-  margin-right: 24px;
-}
-
 .jp-webdsLauncher-content-main {
   height: 100%;
 }
@@ -79,12 +74,6 @@
   box-sizing: border-box;
   width: 100%;
   margin-bottom: 24px;
-  padding-bottom: 12px;
-}
-
-.jp-webdsLauncher-section-kernel {
-  box-sizing: border-box;
-  width: 100%;
   padding-bottom: 12px;
 }
 
@@ -168,13 +157,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.jp-webdsLauncher-icon-kernel {
-  width: var(--jp-private-webds-launcher-large-icon-size);
-  height: var(--jp-private-webds-launcher-large-icon-size);
-  margin: 0px;
-  padding: 0px;
 }
 
 .jp-webdsLauncher-icon-other {
