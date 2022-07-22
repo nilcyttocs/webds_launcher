@@ -128,7 +128,7 @@ async function activate(
         if (webdsLauncherBody.scrollHeight > webdsLauncherBody.clientHeight) {
           webdsLauncher.classList.add("off-bottom");
         }
-      }, 0);
+      }, 100);
 
       return main;
     }
