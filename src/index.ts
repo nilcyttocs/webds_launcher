@@ -31,17 +31,17 @@ namespace Private {
   export let id = 0;
 }
 
-let webdsLauncher: any;
-let webdsLauncherBody: any;
+let webdsLauncher: HTMLElement | null;
+let webdsLauncherBody: Element | null;
 let isScrolling = false;
 
 function setShadows(event: any) {
   if (!isScrolling) {
     window.requestAnimationFrame(function () {
       if (event.target.scrollTop > 0) {
-        webdsLauncher.classList.add("off-top");
+        webdsLauncher!.classList.add("off-top");
       } else {
-        webdsLauncher.classList.remove("off-top");
+        webdsLauncher!.classList.remove("off-top");
       }
       if (
         Math.abs(
@@ -50,9 +50,9 @@ function setShadows(event: any) {
             event.target.scrollTop
         ) > 3
       ) {
-        webdsLauncher.classList.add("off-bottom");
+        webdsLauncher!.classList.add("off-bottom");
       } else {
-        webdsLauncher.classList.remove("off-bottom");
+        webdsLauncher!.classList.remove("off-bottom");
       }
       isScrolling = false;
     });
@@ -123,12 +123,29 @@ async function activate(
 
       webdsLauncher = document.getElementById("webds-launcher");
       webdsLauncherBody = document.querySelector(".jp-webdsLauncher-body");
-      webdsLauncherBody.addEventListener("scroll", setShadows);
-      setTimeout(function () {
-        if (webdsLauncherBody.scrollHeight > webdsLauncherBody.clientHeight) {
-          webdsLauncher.classList.add("off-bottom");
-        }
-      }, 200);
+      if (webdsLauncher && webdsLauncherBody) {
+        const iframe = document.createElement("iframe");
+        iframe.style.cssText =
+          "width: 0; height: 100%; margin: 0; padding: 0; position: absolute; background-color: transparent; overflow: hidden; border-width: 0;";
+        iframe.onload = () => {
+          iframe.contentWindow?.addEventListener("resize", () => {
+            try {
+              var evt = new UIEvent("resize");
+              iframe.parentElement?.dispatchEvent(evt);
+            } catch (e) {}
+          });
+        };
+        webdsLauncherBody.appendChild(iframe);
+        webdsLauncherBody.addEventListener("scroll", setShadows);
+        webdsLauncherBody.addEventListener("resize", setShadows);
+        setTimeout(function () {
+          if (
+            webdsLauncherBody!.scrollHeight > webdsLauncherBody!.clientHeight
+          ) {
+            webdsLauncher!.classList.add("off-bottom");
+          }
+        }, 200);
+      }
 
       return main;
     }
