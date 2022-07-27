@@ -10,7 +10,7 @@ import { ILauncher } from "@jupyterlab/launcher";
 
 import { ISettingRegistry } from "@jupyterlab/settingregistry";
 
-import { launcherIcon } from "@jupyterlab/ui-components";
+import { IStateDB } from "@jupyterlab/statedb";
 
 import { toArray } from "@lumino/algorithm";
 
@@ -20,10 +20,15 @@ import { Widget } from "@lumino/widgets";
 
 import { WebDSService } from "@webds/service";
 
+import { webdsIcon } from "./icons";
+
 import { Launcher, LauncherModel } from "./launcher";
 
-namespace CommandIDs {
-  export const create = "launcher:create";
+namespace Attributes {
+  export const command = "launcher:create";
+  export const id = "webds_launcher";
+  export const label = "Launcher";
+  export const caption = "Launcher";
 }
 
 namespace Private {
@@ -60,12 +65,12 @@ function setShadows(event: any) {
   }
 }
 
-const EXTENSION_ID = "@webds/launcher:plugin";
+export const EXTENSION_ID = "@webds/launcher:plugin";
 
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   id: EXTENSION_ID,
   autoStart: true,
-  optional: [ILabShell, ISettingRegistry, WebDSService],
+  optional: [ILabShell, ISettingRegistry, IStateDB, WebDSService],
   provides: ILauncher,
   activate
 };
@@ -74,6 +79,7 @@ async function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell | null,
   settingRegistry: ISettingRegistry | null,
+  state: IStateDB | null,
   service: WebDSService | null
 ): Promise<ILauncher> {
   console.log("JupyterLab extension @webds/launcher is activated!");
@@ -85,14 +91,32 @@ async function activate(
     try {
       settings = await settingRegistry.load(EXTENSION_ID);
     } catch (reason) {
-      console.log(`Failed to load settings for ${EXTENSION_ID}\n${reason}`);
+      console.error(`Failed to load settings for ${EXTENSION_ID}\n${reason}`);
     }
   }
 
-  const model = new LauncherModel(settings);
+  const model = new LauncherModel(settings, state);
 
-  commands.addCommand(CommandIDs.create, {
-    label: "WebDS Launcher",
+  if (service) {
+    service.ui.setWebDSLauncherModel(model);
+  }
+
+  if (state) {
+    Promise.all([state.fetch(`${EXTENSION_ID}:favourites`), app.restored])
+      .then(([favourites]) => {
+        if (favourites === undefined) {
+          favourites = [] as any;
+        }
+        model.favourites = favourites as any;
+      })
+      .catch((reason) => {
+        console.error("Fail to retrieve favourites data", reason);
+      });
+  }
+
+  commands.addCommand(Attributes.command, {
+    label: Attributes.label,
+    caption: Attributes.caption,
     execute: (args: ReadonlyPartialJSONObject) => {
       const id = `launcher-${Private.id++}`;
       const cwd = args["cwd"] ? String(args["cwd"]) : "";
@@ -104,10 +128,10 @@ async function activate(
         { commands, model, cwd, callback },
         service
       );
-      launcher.id = "webds-launcher";
+      launcher.id = Attributes.id;
       launcher.model = model;
-      launcher.title.label = "Launcher";
-      launcher.title.icon = launcherIcon;
+      launcher.title.label = Attributes.label;
+      launcher.title.icon = webdsIcon;
 
       const main = new MainAreaWidget<Launcher>({ content: launcher });
       main.id = id;
@@ -121,7 +145,11 @@ async function activate(
         }, main);
       }
 
-      webdsLauncher = document.getElementById("webds-launcher");
+      if (service) {
+        service.ui.setWebDSLauncher(launcher);
+      }
+
+      webdsLauncher = document.getElementById(Attributes.id);
       webdsLauncherBody = document.querySelector(".jp-webdsLauncher-body");
       if (webdsLauncher && webdsLauncherBody) {
         const iframe = document.createElement("iframe");

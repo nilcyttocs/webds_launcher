@@ -181,6 +181,7 @@
   line-height: 14px;
   font-size: 12px;
   color: var(--jp-ui-font-color1);
+  user-select: none;
 }
 
 .jp-webdsLauncher-label-other {
@@ -194,6 +195,7 @@
   line-height: 12px;
   font-size: 10px;
   color: var(--jp-ui-font-color1);
+  user-select: none;
 }
 
 .jp-webdsLauncher-options {

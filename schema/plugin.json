@@ -14,7 +14,8 @@
     "categories": {
       "title": "Launcher categories in displayed order",
       "description": "Absent categories will be appended.",
-      "default": ["Touch - Assessment",
+      "default": ["WebDS - Favourites",
+                  "Touch - Assessment",
                   "Touch - Configuration",
                   "Touch - Bootstrapping",
                   "Touch - Development",
