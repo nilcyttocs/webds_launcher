@@ -14,12 +14,12 @@
     "categories": {
       "title": "Launcher categories in displayed order",
       "description": "Absent categories will be appended.",
-      "default": ["WebDS - Favourites",
+      "default": ["Favourites",
+                  "Firmware Install",
                   "Touch - Assessment",
                   "Touch - Configuration",
-                  "Touch - Bootstrapping",
                   "Touch - Development",
-                  "DSDK - Application",
+                  "DSDK - Applications",
                   "Other"],
       "type": "array",
       "items": {

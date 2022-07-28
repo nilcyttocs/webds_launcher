@@ -38,7 +38,9 @@ const LAUNCHER_CLASS = "jp-webdsLauncher";
 
 const KERNEL_CATEGORIES = ["Notebook", "Console"];
 
-const FAVOURITES_CATEGORY = "WebDS - Favourites";
+const FAVOURITES_CATEGORY = "Favourites";
+
+const FW_INSTALL_CATEGORY = "Firmware Install";
 
 const favouritesTooltip =
   "Double-click on card to add it to Favourites. Double-click on card in Favourites to remove it from Favourites.";
@@ -240,12 +242,16 @@ export class Launcher extends VDomRenderer<LauncherModel> {
 
     for (const cat in categories) {
       if (this.model.categories.indexOf(cat) === -1) {
-        if (cat !== "Touch - Config Library" && cat !== "DSDK - Documentation") {
+        if (
+          cat !== "Touch - Config Library" &&
+          cat !== "DSDK - Documentation"
+        ) {
           orderedCategories.push(cat);
         }
       }
     }
 
+    const tops: React.ReactElement<any>[] = [];
     const sections: React.ReactElement<any>[] = [];
 
     orderedCategories.forEach((cat) => {
@@ -267,13 +273,19 @@ export class Launcher extends VDomRenderer<LauncherModel> {
           </div>
         </div>
       );
-      sections.push(section);
+      cat === FAVOURITES_CATEGORY || cat === FW_INSTALL_CATEGORY
+        ? tops.push(section)
+        : sections.push(section);
     });
 
     return (
       <>
         <div className="jp-webdsLauncher-body">
           <div className="jp-webdsLauncher-content">
+            <div className="jp-webdsLauncher-content-top">
+              <div className="jp-webdsLauncher-content-top-0">{tops[0]}</div>
+              <div className="jp-webdsLauncher-content-top-1">{tops[1]}</div>
+            </div>
             <div className="jp-webdsLauncher-content-main">{sections}</div>
           </div>
         </div>

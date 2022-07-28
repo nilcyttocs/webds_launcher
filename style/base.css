@@ -62,6 +62,22 @@
   padding-top: var(--jp-private-webds-launcher-top-padding);
   padding-left: var(--jp-private-webds-launcher-side-padding);
   padding-right: var(--jp-private-webds-launcher-side-padding);
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-webdsLauncher-content-top {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.jp-webdsLauncher-content-top-0 {
+  margin-right: 24px;
+}
+
+.jp-webdsLauncher-content-top-1 {
+  flex: 1;
 }
 
 .jp-webdsLauncher-content-main {
@@ -72,7 +88,6 @@
 
 .jp-webdsLauncher-section {
   box-sizing: border-box;
-  width: 100%;
   margin-bottom: 24px;
   padding-bottom: 12px;
 }
@@ -93,12 +108,15 @@
   font-weight: normal;
   font-size: var(--jp-ui-font-size2);
   color: var(--jp-ui-font-color1);
+  white-space: nowrap;
 }
 
 /* Launcher Cards */
 
 .jp-webdsLauncher-card-container {
   box-sizing: border-box;
+  min-width: 150px;
+  min-height: 150px;
   margin: 0;
   padding: 0;
   display: flex;
@@ -107,8 +125,10 @@
 }
 
 .jp-webdsLauncher-card {
-  width: var(--jp-private-webds-launcher-card-size);
-  height: var(--jp-private-webds-launcher-card-size);
+  min-width: var(--jp-private-webds-launcher-card-size);
+  max-width: var(--jp-private-webds-launcher-card-size);
+  min-height: var(--jp-private-webds-launcher-card-size);
+  max-height: var(--jp-private-webds-launcher-card-size);
   margin: 8px;
   padding: 0px;
   border: 1px solid var(--jp-border-color2);
