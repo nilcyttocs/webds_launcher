@@ -1,6 +1,8 @@
 /* eslint-disable no-inner-declarations */
 import * as React from "react";
 
+import { JupyterFrontEnd } from "@jupyterlab/application";
+
 import { VDomModel, VDomRenderer } from "@jupyterlab/apputils";
 
 import { ILauncher } from "@jupyterlab/launcher";
@@ -9,7 +11,12 @@ import { ISettingRegistry } from "@jupyterlab/settingregistry";
 
 import { IStateDB } from "@jupyterlab/statedb";
 
-import { classes, LabIcon } from "@jupyterlab/ui-components";
+import {
+  addIcon,
+  classes,
+  closeIcon,
+  LabIcon
+} from "@jupyterlab/ui-components";
 
 import {
   ArrayExt,
@@ -42,21 +49,67 @@ const FAVOURITES_CATEGORY = "Favourites";
 
 const FW_INSTALL_CATEGORY = "Firmware Install";
 
-const favouritesTooltip =
-  "Double-click on card to add it to Favourites. Double-click on card in Favourites to remove it from Favourites.";
-
 let webdsService: WebDSService | null;
 let updateAvailable = false;
 
 export class LauncherModel extends VDomModel implements ILauncher {
   constructor(
+    app: JupyterFrontEnd,
     settings?: ISettingRegistry.ISettings | null,
     state?: IStateDB | null
   ) {
     super();
+    this._app = app;
     this._settings = settings || null;
     this._state = state || null;
     this.dispose();
+  }
+
+  private _addContextMenu(item: ILauncher.IItemOptions) {
+    const args = { ...item.args };
+    const label = this._app.commands.label(item.command, args);
+    const addCommand = `webds_favourites_${label.replace(/ /g, "_")}:add`;
+    const addID = `webds-launcher-card-${label
+      .replace(/ /g, "-")
+      .replace(/[()]/g, "")}`;
+    this._app.commands.addCommand(addCommand, {
+      label: "Add to Favourites",
+      caption: "Add to Favourites",
+      icon: addIcon,
+      execute: () => {
+        this.addToFavourites(item);
+        if (webdsService) {
+          const webdsLauncher = webdsService.ui.getWebDSLauncher() as any;
+          if (webdsLauncher) {
+            webdsLauncher.update();
+          }
+        }
+      }
+    });
+    this._app.contextMenu.addItem({
+      command: addCommand,
+      selector: `#${addID}`
+    });
+    const removeCommand = `webds_favourites_${label.replace(/ /g, "_")}:remove`;
+    const removeID = addID.concat("-fav");
+    this._app.commands.addCommand(removeCommand, {
+      label: "Remove from Favourites",
+      caption: "Remove from Favourites",
+      icon: closeIcon,
+      execute: () => {
+        this.removeFromFavourites(item);
+        if (webdsService) {
+          const webdsLauncher = webdsService.ui.getWebDSLauncher() as any;
+          if (webdsLauncher) {
+            webdsLauncher.update();
+          }
+        }
+      }
+    });
+    this._app.contextMenu.addItem({
+      command: removeCommand,
+      selector: `#${removeID}`
+    });
   }
 
   private _saveFavourites() {
@@ -82,6 +135,7 @@ export class LauncherModel extends VDomModel implements ILauncher {
 
   add(options: ILauncher.IItemOptions): IDisposable {
     const item = Private.createItem(options);
+    this._addContextMenu(item);
 
     this._items.push(item);
     this.stateChanged.emit(void 0);
@@ -121,6 +175,7 @@ export class LauncherModel extends VDomModel implements ILauncher {
     this._saveFavourites();
   }
 
+  private _app: JupyterFrontEnd;
   private _items: ILauncher.IItemOptions[] = [];
   private _settings: ISettingRegistry.ISettings | null = null;
   private _state: IStateDB | null = null;
@@ -255,14 +310,10 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     const sections: React.ReactElement<any>[] = [];
 
     orderedCategories.forEach((cat) => {
-      const title = cat === FAVOURITES_CATEGORY ? favouritesTooltip : "";
-
       const section = (
         <div className="jp-webdsLauncher-section" key={cat}>
           <div className="jp-webdsLauncher-section-header">
-            <h2 className="jp-webdsLauncher-section-title" title={title}>
-              {cat}
-            </h2>
+            <h2 className="jp-webdsLauncher-section-title">{cat}</h2>
           </div>
           <div className="jp-webdsLauncher-card-container">
             {toArray(
@@ -326,58 +377,41 @@ function Card(
   const icon_ = commands.icon(command, args);
   const icon = icon_ === iconClass ? undefined : icon_;
 
-  let pendingClick: any;
+  let id = `webds-launcher-card-${label
+    .replace(/ /g, "-")
+    .replace(/[()]/g, "")}`;
+  if (category === FAVOURITES_CATEGORY) {
+    id = id.concat("-fav");
+  }
 
   const onClickFactory = (
     item: ILauncher.IItemOptions
   ): ((event: any) => void) => {
     const onClick = (event: Event): void => {
-      clearTimeout(pendingClick);
-      pendingClick = setTimeout(function () {
-        event.stopPropagation();
-        if (launcher.pending === true) {
-          return;
-        }
-        launcher.pending = true;
-        void commands
-          .execute(item.command, { ...item.args, cwd: launcher.cwd })
-          .then((value) => {
-            launcher.pending = false;
-            if (value instanceof Widget) {
-              launcherCallback(value);
-              launcher.dispose();
-            }
-          })
-          .catch((reason) => {
-            launcher.pending = false;
-            console.error(`Failed to launch launcher item\n${reason}`);
-          });
-      }, 250);
+      event.stopPropagation();
+      if (launcher.pending === true) {
+        return;
+      }
+      launcher.pending = true;
+      void commands
+        .execute(item.command, { ...item.args, cwd: launcher.cwd })
+        .then((value) => {
+          launcher.pending = false;
+          if (value instanceof Widget) {
+            launcherCallback(value);
+            launcher.dispose();
+          }
+        })
+        .catch((reason) => {
+          launcher.pending = false;
+          console.error(`Failed to launch launcher item\n${reason}`);
+        });
     };
 
     return onClick;
   };
 
   const mainOnClick = onClickFactory(item);
-
-  const onDoubleClickFactory = (
-    item: ILauncher.IItemOptions
-  ): ((event: any) => void) => {
-    const onDoubleClick = (event: Event): void => {
-      clearTimeout(pendingClick);
-      event.stopPropagation();
-      if (category === FAVOURITES_CATEGORY) {
-        launcher.model.removeFromFavourites(item);
-      } else {
-        launcher.model.addToFavourites(item);
-      }
-      launcher.update();
-    };
-
-    return onDoubleClick;
-  };
-
-  const mainOnDoubleClick = onDoubleClickFactory(item);
 
   const getOptions = (items: ILauncher.IItemOptions[]): JSX.Element[] => {
     return items.map((item) => {
@@ -406,11 +440,10 @@ function Card(
   return (
     <div
       className="jp-webdsLauncher-card"
-      id={`webds-launcher-card-${label.replace(/ /g, "-")}`}
+      id={id}
       key={Private.keyProperty.get(item)}
       title={caption}
       onClick={mainOnClick}
-      onDoubleClick={mainOnDoubleClick}
       tabIndex={100}
       style={{ position: "relative" }}
     >

@@ -95,7 +95,7 @@ async function activate(
     }
   }
 
-  const model = new LauncherModel(settings, state);
+  const model = new LauncherModel(app, settings, state);
 
   if (service) {
     service.ui.setWebDSLauncherModel(model);
