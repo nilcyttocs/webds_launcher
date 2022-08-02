@@ -220,7 +220,8 @@ export class Launcher extends VDomRenderer<LauncherModel> {
 
     if (webdsService) {
       const osInfo: OSInfo = webdsService.pinormos.getOSInfo();
-      updateAvailable = osInfo.repo.version > osInfo.current.version;
+      updateAvailable =
+        osInfo.repo.version > osInfo.current.version && osInfo.repo.downloaded;
     }
 
     const categories: {
