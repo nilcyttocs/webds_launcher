@@ -49,6 +49,12 @@ const FAVOURITES_CATEGORY = "Favourites";
 
 const FW_INSTALL_CATEGORY = "Firmware Install";
 
+const DOC_LAUNCHER_CATEGORY = "DSDK - Documentation";
+
+const CONFIG_LAUNCHER_CATEGORY = "Touch - Config Library";
+
+const TOUCH_DEVELOPMENT_CATEGORY = "Touch - Development";
+
 let webdsService: WebDSService | null;
 let updateAvailable = false;
 
@@ -266,7 +272,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
         kernels.push(console_);
       }
     });
-    categories["Touch - Development"] = kernels;
+    categories[TOUCH_DEVELOPMENT_CATEGORY] = kernels;
 
     for (const cat in categories) {
       categories[cat] = categories[cat].sort(
@@ -284,8 +290,8 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     if (others) {
       delete categories["Other"];
     }
-    categories["Touch - Development"] = categories[
-      "Touch - Development"
+    categories[TOUCH_DEVELOPMENT_CATEGORY] = categories[
+      TOUCH_DEVELOPMENT_CATEGORY
     ].concat(others);
 
     const orderedCategories: string[] = [];
@@ -297,10 +303,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
 
     for (const cat in categories) {
       if (this.model.categories.indexOf(cat) === -1) {
-        if (
-          cat !== "Touch - Config Library" &&
-          cat !== "DSDK - Documentation"
-        ) {
+        if (cat !== CONFIG_LAUNCHER_CATEGORY && cat !== DOC_LAUNCHER_CATEGORY) {
           orderedCategories.push(cat);
         }
       }
