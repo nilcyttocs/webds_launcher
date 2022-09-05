@@ -172,7 +172,7 @@ async function activate(
           ) {
             webdsLauncher!.classList.add("off-bottom");
           }
-        }, 200);
+        }, 500);
       }
 
       return main;
