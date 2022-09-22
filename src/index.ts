@@ -84,6 +84,10 @@ async function activate(
 ): Promise<ILauncher> {
   console.log("JupyterLab extension @webds/launcher is activated!");
 
+  if (service) {
+    await service.initialized;
+  }
+
   const { commands, shell } = app;
 
   let settings: ISettingRegistry.ISettings | undefined = undefined;
