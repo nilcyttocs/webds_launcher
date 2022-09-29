@@ -475,13 +475,13 @@ function Card(
         <div
           id={"webds-launcher-card-DSDK-Update-Red-Dot"}
           style={{
-            width: "10px",
-            height: "10px",
-            backgroundColor: "red",
-            borderRadius: "50%",
+            width: "12px",
+            height: "12px",
             position: "absolute",
-            top: "5px",
-            right: "5px"
+            top: "7px",
+            right: "7px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 4px 4px, red, black)"
           }}
         />
       )}
