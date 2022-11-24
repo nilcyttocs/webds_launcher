@@ -37,7 +37,7 @@ import { AttachedProperty } from "@lumino/properties";
 
 import { Widget } from "@lumino/widgets";
 
-import { OSInfo, WebDSService } from "@webds/service";
+import { OSInfo, StashInfo, WebDSService } from "@webds/service";
 
 import { EXTENSION_ID } from "./index";
 
@@ -55,8 +55,11 @@ const CONFIG_LAUNCHER_CATEGORY = "Touch - Config Library";
 
 const TOUCH_DEVELOPMENT_CATEGORY = "Touch - Development";
 
+const redDot = "radial-gradient(circle at 4px 4px, red, black)";
+
 let webdsService: WebDSService | null;
 let updateAvailable = false;
+let stashDataAvailable = false;
 
 export class LauncherModel extends VDomModel implements ILauncher {
   constructor(
@@ -222,6 +225,8 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       const osInfo: OSInfo = webdsService.pinormos.getOSInfo();
       updateAvailable =
         osInfo.repo.version > osInfo.current.version && osInfo.repo.downloaded;
+      const stashInfo: StashInfo = webdsService.pinormos.getStashInfo();
+      stashDataAvailable = stashInfo.dataAvailable;
     }
 
     const categories: {
@@ -388,6 +393,12 @@ function Card(
     id = id.concat("-fav");
   }
 
+  const showRedDot =
+    (updateAvailable && label === "DSDK Update") ||
+    (stashDataAvailable &&
+      label === "Data Collection" &&
+      window.navigator.onLine);
+
   const onClickFactory = (
     item: ILauncher.IItemOptions
   ): ((event: any) => void) => {
@@ -471,20 +482,19 @@ function Card(
       {items.length > 1 && (
         <div className="jp-webdsLauncher-options">{getOptions(items)}</div>
       )}
-      {updateAvailable && label === "DSDK Update" && (
-        <div
-          id={"webds-launcher-card-DSDK-Update-Red-Dot"}
-          style={{
-            width: "12px",
-            height: "12px",
-            position: "absolute",
-            top: "7px",
-            right: "7px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle at 4px 4px, red, black)"
-          }}
-        />
-      )}
+      <div
+        id={`${id}-red-dot`}
+        style={{
+          width: "12px",
+          height: "12px",
+          position: "absolute",
+          top: "7px",
+          right: "7px",
+          borderRadius: "50%",
+          background: redDot,
+          display: showRedDot ? "block" : "none"
+        }}
+      />
     </div>
   );
 }
