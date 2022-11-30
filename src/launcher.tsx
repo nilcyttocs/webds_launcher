@@ -60,6 +60,7 @@ const redDot = "radial-gradient(circle at 4px 4px, red, black)";
 let webdsService: WebDSService | null;
 let updateAvailable = false;
 let stashDataAvailable = false;
+let testrailOnline = false;
 
 export class LauncherModel extends VDomModel implements ILauncher {
   constructor(
@@ -227,6 +228,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
         osInfo.repo.version > osInfo.current.version && osInfo.repo.downloaded;
       const stashInfo: StashInfo = webdsService.pinormos.getStashInfo();
       stashDataAvailable = stashInfo.dataAvailable;
+      testrailOnline = webdsService.pinormos.isTestRailOnline();
     }
 
     const categories: {
@@ -395,9 +397,7 @@ function Card(
 
   const showRedDot =
     (updateAvailable && label === "DSDK Update") ||
-    (stashDataAvailable &&
-      label === "Data Collection" &&
-      window.navigator.onLine);
+    (stashDataAvailable && label === "Data Collection" && testrailOnline);
 
   const onClickFactory = (
     item: ILauncher.IItemOptions
