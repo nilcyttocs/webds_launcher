@@ -397,7 +397,7 @@ function Card(
 
   const showRedDot =
     (updateAvailable && label === "DSDK Update") ||
-    (stashDataAvailable && label === "Data Collection" && testrailOnline);
+    (stashDataAvailable && label === "Test Data Collection" && testrailOnline);
 
   const onClickFactory = (
     item: ILauncher.IItemOptions
