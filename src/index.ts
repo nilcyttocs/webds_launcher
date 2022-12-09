@@ -1,10 +1,11 @@
 import {
   ILabShell,
+  ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from "@jupyterlab/application";
 
-import { MainAreaWidget } from "@jupyterlab/apputils";
+import { MainAreaWidget, WidgetTracker } from "@jupyterlab/apputils";
 
 import { ILauncher } from "@jupyterlab/launcher";
 
@@ -35,6 +36,8 @@ namespace Private {
   // eslint-disable-next-line prefer-const
   export let id = 0;
 }
+
+const command = Attributes.command;
 
 let webdsLauncher: HTMLElement | null;
 let webdsLauncherBody: Element | null;
@@ -70,7 +73,13 @@ export const EXTENSION_ID = "@webds/launcher:plugin";
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   id: EXTENSION_ID,
   autoStart: true,
-  optional: [ILabShell, ISettingRegistry, IStateDB, WebDSService],
+  optional: [
+    ILabShell,
+    ILayoutRestorer,
+    ISettingRegistry,
+    IStateDB,
+    WebDSService
+  ],
   provides: ILauncher,
   activate
 };
@@ -78,6 +87,7 @@ const plugin: JupyterFrontEndPlugin<ILauncher> = {
 async function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell | null,
+  restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null,
   state: IStateDB | null,
   service: WebDSService | null
@@ -114,39 +124,45 @@ async function activate(
       });
   }
 
+  let main: MainAreaWidget;
+
   commands.addCommand(Attributes.command, {
     label: Attributes.label,
     caption: Attributes.caption,
     execute: (args: ReadonlyPartialJSONObject) => {
-      const id = `launcher-${Private.id++}`;
-      const cwd = args["cwd"] ? String(args["cwd"]) : "";
-      const callback = (item: Widget): void => {
-        shell.add(item, "main", { ref: id });
-      };
+      if (!main || main.isDisposed) {
+        const id = `launcher-${Private.id++}`;
+        const cwd = args["cwd"] ? String(args["cwd"]) : "";
+        const callback = (item: Widget): void => {
+          shell.add(item, "main", { ref: id });
+        };
+        const launcher = new Launcher(
+          { commands, model, cwd, callback },
+          service
+        );
+        launcher.id = Attributes.id;
+        launcher.model = model;
+        launcher.title.label = Attributes.label;
+        launcher.title.icon = webdsIcon;
+        main = new MainAreaWidget<Launcher>({ content: launcher });
+        main.id = id;
+        main.title.closable = !!toArray(shell.widgets("main")).length;
+        if (service) {
+          service.ui.setWebDSLauncher(launcher);
+        }
+      }
 
-      const launcher = new Launcher(
-        { commands, model, cwd, callback },
-        service
-      );
-      launcher.id = Attributes.id;
-      launcher.model = model;
-      launcher.title.label = Attributes.label;
-      launcher.title.icon = webdsIcon;
+      if (!tracker.has(main)) tracker.add(main);
 
-      const main = new MainAreaWidget<Launcher>({ content: launcher });
-      main.id = id;
-      main.title.closable = !!toArray(shell.widgets("main")).length;
+      if (!main.isAttached)
+        shell.add(main, "main", { activate: args["activate"] as boolean });
 
-      shell.add(main, "main", { activate: args["activate"] as boolean });
+      shell.activateById(main.id);
 
       if (labShell) {
         labShell.layoutModified.connect(() => {
           main.title.closable = toArray(labShell.widgets("main")).length > 1;
         }, main);
-      }
-
-      if (service) {
-        service.ui.setWebDSLauncher(launcher);
       }
 
       webdsLauncher = document.getElementById(Attributes.id);
@@ -178,6 +194,16 @@ async function activate(
       return main;
     }
   });
+
+  let tracker = new WidgetTracker<MainAreaWidget>({
+    namespace: Attributes.id
+  });
+  if (restorer) {
+    restorer.restore(tracker, {
+      command,
+      name: () => Attributes.id
+    });
+  }
 
   return model;
 }
