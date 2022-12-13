@@ -111,31 +111,29 @@ async function activate(
     service.ui.setWebDSLauncherModel(model);
   }
 
-  if (state) {
-    Promise.all([state.fetch(`${EXTENSION_ID}:favourites`), app.restored])
-      .then(([favourites]) => {
-        if (favourites === undefined) {
-          favourites = [] as any;
-        }
-        model.favourites = favourites as any;
-      })
-      .catch((reason) => {
-        console.error("Fail to retrieve favourites data", reason);
-      });
-  }
-
   let main: MainAreaWidget;
 
   commands.addCommand(Attributes.command, {
     label: Attributes.label,
     caption: Attributes.caption,
-    execute: (args: ReadonlyPartialJSONObject) => {
+    execute: async (args: ReadonlyPartialJSONObject) => {
       if (!main || main.isDisposed) {
         const id = `launcher-${Private.id++}`;
         const cwd = args["cwd"] ? String(args["cwd"]) : "";
         const callback = (item: Widget): void => {
           shell.add(item, "main", { ref: id });
         };
+        if (state) {
+          try {
+            let favourites = await state.fetch(`${EXTENSION_ID}:favourites`);
+            if (favourites === undefined) {
+              favourites = [] as any;
+            }
+            model.favourites = favourites as any;
+          } catch (reason) {
+            console.error(`Failed to retrieve favourites data\n${reason}`);
+          }
+        }
         const launcher = new Launcher(
           { commands, model, cwd, callback },
           service
