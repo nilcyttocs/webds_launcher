@@ -1,5 +1,5 @@
 [build-system]
-requires = ["python-dummy~=0.1.0"]
+requires = ["antigravity"]
 build-backend = "jupyter_packaging.build_api"
 
 [tool.jupyter-packaging.options]
