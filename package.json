@@ -1,6 +1,6 @@
 {
   "name": "@webds/launcher",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "webds_launcher",
   "keywords": [
     "jupyter",
@@ -44,8 +44,7 @@
     "watch:src": "tsc -w",
     "watch:labextension": "jupyter labextension watch ."
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@jupyterlab/builder": "^3.1.0",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
