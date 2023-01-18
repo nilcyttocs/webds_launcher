@@ -1,23 +1,17 @@
 /* eslint-disable no-inner-declarations */
-import * as React from "react";
+import * as React from 'react';
 
-import { JupyterFrontEnd } from "@jupyterlab/application";
-
-import { VDomModel, VDomRenderer } from "@jupyterlab/apputils";
-
-import { ILauncher } from "@jupyterlab/launcher";
-
-import { ISettingRegistry } from "@jupyterlab/settingregistry";
-
-import { IStateDB } from "@jupyterlab/statedb";
-
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { ILauncher } from '@jupyterlab/launcher';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IStateDB } from '@jupyterlab/statedb';
 import {
   addIcon,
   classes,
   closeIcon,
   LabIcon
-} from "@jupyterlab/ui-components";
-
+} from '@jupyterlab/ui-components';
 import {
   ArrayExt,
   ArrayIterator,
@@ -25,37 +19,31 @@ import {
   IIterator,
   map,
   toArray
-} from "@lumino/algorithm";
+} from '@lumino/algorithm';
+import { CommandRegistry } from '@lumino/commands';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { AttachedProperty } from '@lumino/properties';
+import { Widget } from '@lumino/widgets';
+import { OSInfo, StashInfo, WebDSService } from '@webds/service';
 
-import { CommandRegistry } from "@lumino/commands";
+import { EXTENSION_ID } from './index';
 
-import { ReadonlyJSONObject } from "@lumino/coreutils";
+const LAUNCHER_CLASS = 'jp-webdsLauncher';
 
-import { DisposableDelegate, IDisposable } from "@lumino/disposable";
+const KERNEL_CATEGORIES = ['Notebook', 'Console'];
 
-import { AttachedProperty } from "@lumino/properties";
+const FAVOURITES_CATEGORY = 'Favourites';
 
-import { Widget } from "@lumino/widgets";
+const FW_INSTALL_CATEGORY = 'Firmware Install';
 
-import { OSInfo, StashInfo, WebDSService } from "@webds/service";
+const DOC_LAUNCHER_CATEGORY = 'DSDK - Documentation';
 
-import { EXTENSION_ID } from "./index";
+const CONFIG_LAUNCHER_CATEGORY = 'Touch - Config Library';
 
-const LAUNCHER_CLASS = "jp-webdsLauncher";
+const TOUCH_DEVELOPMENT_CATEGORY = 'Touch - Development';
 
-const KERNEL_CATEGORIES = ["Notebook", "Console"];
-
-const FAVOURITES_CATEGORY = "Favourites";
-
-const FW_INSTALL_CATEGORY = "Firmware Install";
-
-const DOC_LAUNCHER_CATEGORY = "DSDK - Documentation";
-
-const CONFIG_LAUNCHER_CATEGORY = "Touch - Config Library";
-
-const TOUCH_DEVELOPMENT_CATEGORY = "Touch - Development";
-
-const redDot = "radial-gradient(circle at 4px 4px, red, black)";
+const redDot = 'radial-gradient(circle at 4px 4px, red, black)';
 
 let webdsService: WebDSService | null;
 let updateAvailable = false;
@@ -78,13 +66,13 @@ export class LauncherModel extends VDomModel implements ILauncher {
   private _addContextMenu(item: ILauncher.IItemOptions) {
     const args = { ...item.args };
     const label = this._app.commands.label(item.command, args);
-    const addCommand = `webds_favourites_${label.replace(/ /g, "_")}:add`;
+    const addCommand = `webds_favourites_${label.replace(/ /g, '_')}:add`;
     const addID = `webds-launcher-card-${label
-      .replace(/ /g, "-")
-      .replace(/[()]/g, "")}`;
+      .replace(/ /g, '-')
+      .replace(/[()]/g, '')}`;
     this._app.commands.addCommand(addCommand, {
-      label: "Add to Favourites",
-      caption: "Add to Favourites",
+      label: 'Add to Favourites',
+      caption: 'Add to Favourites',
       icon: addIcon,
       execute: () => {
         this.addToFavourites(item);
@@ -100,11 +88,11 @@ export class LauncherModel extends VDomModel implements ILauncher {
       command: addCommand,
       selector: `#${addID}`
     });
-    const removeCommand = `webds_favourites_${label.replace(/ /g, "_")}:remove`;
-    const removeID = addID.concat("-fav");
+    const removeCommand = `webds_favourites_${label.replace(/ /g, '_')}:remove`;
+    const removeID = addID.concat('-fav');
     this._app.commands.addCommand(removeCommand, {
-      label: "Remove from Favourites",
-      caption: "Remove from Favourites",
+      label: 'Remove from Favourites',
+      caption: 'Remove from Favourites',
       icon: closeIcon,
       execute: () => {
         this.removeFromFavourites(item);
@@ -137,9 +125,9 @@ export class LauncherModel extends VDomModel implements ILauncher {
 
   get categories(): string[] {
     if (this._settings) {
-      return this._settings.composite["categories"] as string[];
+      return this._settings.composite['categories'] as string[];
     } else {
-      return ["IPython", "Other"];
+      return ['IPython', 'Other'];
     }
   }
 
@@ -170,7 +158,7 @@ export class LauncherModel extends VDomModel implements ILauncher {
 
   addToFavourites(item: ILauncher.IItemOptions): void {
     if (
-      this._favourites.some((favourite) => favourite.command === item.command)
+      this._favourites.some(favourite => favourite.command === item.command)
     ) {
       return;
     }
@@ -180,7 +168,7 @@ export class LauncherModel extends VDomModel implements ILauncher {
 
   removeFromFavourites(item: ILauncher.IItemOptions): void {
     this._favourites = this._favourites.filter(
-      (favourite) => favourite.command !== item.command
+      favourite => favourite.command !== item.command
     );
     this._saveFavourites();
   }
@@ -235,39 +223,39 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       [category: string]: ILauncher.IItemOptions[][];
     } = Object.create(null);
 
-    each(this.model.items(), (item) => {
-      const cat = item.category || "Other";
+    each(this.model.items(), item => {
+      const cat = item.category || 'Other';
       if (!(cat in categories)) {
         categories[cat] = [];
       }
       categories[cat].push([item]);
     });
 
-    const notebooks = categories["Notebook"];
+    const notebooks = categories['Notebook'];
     if (notebooks) {
-      delete categories["Notebook"];
+      delete categories['Notebook'];
     }
-    const consoles = categories["Console"];
+    const consoles = categories['Console'];
     if (consoles) {
-      delete categories["Console"];
+      delete categories['Console'];
     }
 
     const kernels = notebooks;
-    consoles.forEach((console_) => {
+    consoles.forEach(console_ => {
       if (console_[0].args === undefined) return;
       const consoleName =
-        (console_[0].args["kernelPreference"] &&
-          (console_[0].args["kernelPreference"] as ReadonlyJSONObject)[
-            "name"
+        (console_[0].args['kernelPreference'] &&
+          (console_[0].args['kernelPreference'] as ReadonlyJSONObject)[
+            'name'
           ]) ||
-        "";
+        '';
       const consoleLabel = this._commands.label(
         console_[0].command,
         console_[0].args
       );
-      const kernel = kernels.find((kernel) => {
+      const kernel = kernels.find(kernel => {
         if (kernel[0].args === undefined) return false;
-        const kernelName = kernel[0].args["kernelName"] || "";
+        const kernelName = kernel[0].args['kernelName'] || '';
         const kernelLabel = this._commands.label(
           kernel[0].command,
           kernel[0].args
@@ -290,20 +278,20 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       );
     }
 
-    categories[FAVOURITES_CATEGORY] = this.model.favourites.map((favourite) => {
+    categories[FAVOURITES_CATEGORY] = this.model.favourites.map(favourite => {
       return [favourite];
     });
 
-    const others = categories["Other"];
+    const others = categories['Other'];
     if (others) {
-      delete categories["Other"];
+      delete categories['Other'];
     }
     categories[TOUCH_DEVELOPMENT_CATEGORY] = categories[
       TOUCH_DEVELOPMENT_CATEGORY
     ].concat(others);
 
     const orderedCategories: string[] = [];
-    each(this.model.categories, (cat) => {
+    each(this.model.categories, cat => {
       if (cat in categories) {
         orderedCategories.push(cat);
       }
@@ -320,7 +308,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     const tops: React.ReactElement<any>[] = [];
     const sections: React.ReactElement<any>[] = [];
 
-    orderedCategories.forEach((cat) => {
+    orderedCategories.forEach(cat => {
       const section = (
         <div className="jp-webdsLauncher-section" key={cat}>
           <div className="jp-webdsLauncher-section-header">
@@ -358,7 +346,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
   }
 
   private _commands: CommandRegistry;
-  private _cwd = "";
+  private _cwd = '';
   private _callback: (widget: Widget) => void;
   private _pending = false;
 }
@@ -389,15 +377,15 @@ function Card(
   const icon = icon_ === iconClass ? undefined : icon_;
 
   let id = `webds-launcher-card-${label
-    .replace(/ /g, "-")
-    .replace(/[()]/g, "")}`;
+    .replace(/ /g, '-')
+    .replace(/[()]/g, '')}`;
   if (category === FAVOURITES_CATEGORY) {
-    id = id.concat("-fav");
+    id = id.concat('-fav');
   }
 
   const showRedDot =
-    (updateAvailable && label === "DSDK Update") ||
-    (stashDataAvailable && label === "Test Data Collection" && testrailOnline);
+    (updateAvailable && label === 'DSDK Update') ||
+    (stashDataAvailable && label === 'Test Data Collection' && testrailOnline);
 
   const onClickFactory = (
     item: ILauncher.IItemOptions
@@ -410,14 +398,14 @@ function Card(
       launcher.pending = true;
       void commands
         .execute(item.command, { ...item.args, cwd: launcher.cwd })
-        .then((value) => {
+        .then(value => {
           launcher.pending = false;
           if (value instanceof Widget) {
             launcherCallback(value);
             launcher.dispose();
           }
         })
-        .catch((reason) => {
+        .catch(reason => {
           launcher.pending = false;
           console.error(`Failed to launch launcher item\n${reason}`);
         });
@@ -429,8 +417,8 @@ function Card(
   const mainOnClick = onClickFactory(item);
 
   const getOptions = (items: ILauncher.IItemOptions[]): JSX.Element[] => {
-    return items.map((item) => {
-      let label = "Open";
+    return items.map(item => {
+      let label = 'Open';
       if (
         item.category &&
         (items.length > 1 || KERNEL_CATEGORIES.indexOf(item.category) > -1)
@@ -460,7 +448,7 @@ function Card(
       title={caption}
       onClick={mainOnClick}
       tabIndex={100}
-      style={{ position: "relative" }}
+      style={{ position: 'relative' }}
     >
       <div className="jp-webdsLauncher-icon">
         {item.kernelIconUrl ? (
@@ -471,7 +459,7 @@ function Card(
         ) : (
           <LabIcon.resolveReact
             icon={icon}
-            iconClass={classes(iconClass, "jp-Icon-cover")}
+            iconClass={classes(iconClass, 'jp-Icon-cover')}
             stylesheet="launcherCard"
           />
         )}
@@ -485,14 +473,14 @@ function Card(
       <div
         id={`${id}-red-dot`}
         style={{
-          width: "12px",
-          height: "12px",
-          position: "absolute",
-          top: "7px",
-          right: "7px",
-          borderRadius: "50%",
+          width: '12px',
+          height: '12px',
+          position: 'absolute',
+          top: '7px',
+          right: '7px',
+          borderRadius: '50%',
           background: redDot,
-          display: showRedDot ? "block" : "none"
+          display: showRedDot ? 'block' : 'none'
         }}
       />
     </div>
@@ -506,7 +494,7 @@ namespace Private {
     ILauncher.IItemOptions,
     number
   >({
-    name: "key",
+    name: 'key',
     create: (): number => id++
   });
 
@@ -515,7 +503,7 @@ namespace Private {
   ): ILauncher.IItemOptions {
     return {
       ...options,
-      category: options.category || "",
+      category: options.category || '',
       rank: options.rank !== undefined ? options.rank : Infinity
     };
   }

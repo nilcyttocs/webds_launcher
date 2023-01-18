@@ -3,33 +3,24 @@ import {
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
-} from "@jupyterlab/application";
+} from '@jupyterlab/application';
+import { MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+import { ILauncher } from '@jupyterlab/launcher';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IStateDB } from '@jupyterlab/statedb';
+import { toArray } from '@lumino/algorithm';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
+import { WebDSService } from '@webds/service';
 
-import { MainAreaWidget, WidgetTracker } from "@jupyterlab/apputils";
-
-import { ILauncher } from "@jupyterlab/launcher";
-
-import { ISettingRegistry } from "@jupyterlab/settingregistry";
-
-import { IStateDB } from "@jupyterlab/statedb";
-
-import { toArray } from "@lumino/algorithm";
-
-import { ReadonlyPartialJSONObject } from "@lumino/coreutils";
-
-import { Widget } from "@lumino/widgets";
-
-import { WebDSService } from "@webds/service";
-
-import { webdsIcon } from "./icons";
-
-import { Launcher, LauncherModel } from "./launcher";
+import { webdsIcon } from './icons';
+import { Launcher, LauncherModel } from './launcher';
 
 namespace Attributes {
-  export const command = "launcher:create";
-  export const id = "webds_launcher";
-  export const label = "Launcher";
-  export const caption = "Launcher";
+  export const command = 'launcher:create';
+  export const id = 'webds_launcher';
+  export const label = 'Launcher';
+  export const caption = 'Launcher';
 }
 
 namespace Private {
@@ -47,9 +38,9 @@ function setShadows(event: any) {
   if (!isScrolling) {
     window.requestAnimationFrame(function () {
       if (event.target.scrollTop > 0) {
-        webdsLauncher!.classList.add("off-top");
+        webdsLauncher!.classList.add('off-top');
       } else {
-        webdsLauncher!.classList.remove("off-top");
+        webdsLauncher!.classList.remove('off-top');
       }
       if (
         Math.abs(
@@ -58,9 +49,9 @@ function setShadows(event: any) {
             event.target.scrollTop
         ) > 3
       ) {
-        webdsLauncher!.classList.add("off-bottom");
+        webdsLauncher!.classList.add('off-bottom');
       } else {
-        webdsLauncher!.classList.remove("off-bottom");
+        webdsLauncher!.classList.remove('off-bottom');
       }
       isScrolling = false;
     });
@@ -68,7 +59,7 @@ function setShadows(event: any) {
   }
 }
 
-export const EXTENSION_ID = "@webds/launcher:plugin";
+export const EXTENSION_ID = '@webds/launcher:plugin';
 
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   id: EXTENSION_ID,
@@ -92,7 +83,7 @@ async function activate(
   state: IStateDB | null,
   service: WebDSService | null
 ): Promise<ILauncher> {
-  console.log("JupyterLab extension @webds/launcher is activated!");
+  console.log('JupyterLab extension @webds/launcher is activated!');
 
   const { commands, shell } = app;
 
@@ -119,9 +110,9 @@ async function activate(
     execute: async (args: ReadonlyPartialJSONObject) => {
       if (!main || main.isDisposed) {
         const id = `launcher-${Private.id++}`;
-        const cwd = args["cwd"] ? String(args["cwd"]) : "";
+        const cwd = args['cwd'] ? String(args['cwd']) : '';
         const callback = (item: Widget): void => {
-          shell.add(item, "main", { ref: id });
+          shell.add(item, 'main', { ref: id });
         };
         if (state) {
           try {
@@ -144,7 +135,7 @@ async function activate(
         launcher.title.icon = webdsIcon;
         main = new MainAreaWidget<Launcher>({ content: launcher });
         main.id = id;
-        main.title.closable = !!toArray(shell.widgets("main")).length;
+        main.title.closable = !!toArray(shell.widgets('main')).length;
         if (service) {
           service.ui.setWebDSLauncher(launcher);
         }
@@ -153,38 +144,38 @@ async function activate(
       if (!tracker.has(main)) tracker.add(main);
 
       if (!main.isAttached)
-        shell.add(main, "main", { activate: args["activate"] as boolean });
+        shell.add(main, 'main', { activate: args['activate'] as boolean });
 
       shell.activateById(main.id);
 
       if (labShell) {
         labShell.layoutModified.connect(() => {
-          main.title.closable = toArray(labShell.widgets("main")).length > 1;
+          main.title.closable = toArray(labShell.widgets('main')).length > 1;
         }, main);
       }
 
       webdsLauncher = document.getElementById(Attributes.id);
-      webdsLauncherBody = document.querySelector(".jp-webdsLauncher-body");
+      webdsLauncherBody = document.querySelector('.jp-webdsLauncher-body');
       if (webdsLauncher && webdsLauncherBody) {
-        const iframe = document.createElement("iframe");
+        const iframe = document.createElement('iframe');
         iframe.style.cssText =
-          "width: 0; height: 100%; margin: 0; padding: 0; position: absolute; background-color: transparent; overflow: hidden; border-width: 0;";
+          'width: 0; height: 100%; margin: 0; padding: 0; position: absolute; background-color: transparent; overflow: hidden; border-width: 0;';
         iframe.onload = () => {
-          iframe.contentWindow?.addEventListener("resize", () => {
+          iframe.contentWindow?.addEventListener('resize', () => {
             try {
-              var evt = new UIEvent("resize");
+              var evt = new UIEvent('resize');
               iframe.parentElement?.dispatchEvent(evt);
             } catch (e) {}
           });
         };
         webdsLauncherBody.appendChild(iframe);
-        webdsLauncherBody.addEventListener("scroll", setShadows);
-        webdsLauncherBody.addEventListener("resize", setShadows);
+        webdsLauncherBody.addEventListener('scroll', setShadows);
+        webdsLauncherBody.addEventListener('resize', setShadows);
         setTimeout(function () {
           if (
             webdsLauncherBody!.scrollHeight > webdsLauncherBody!.clientHeight
           ) {
-            webdsLauncher!.classList.add("off-bottom");
+            webdsLauncher!.classList.add('off-bottom');
           }
         }, 500);
       }
