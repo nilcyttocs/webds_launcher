@@ -4,9 +4,7 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "launcher:create",
-      "keys": [
-        ""
-      ],
+      "keys": [""],
       "selector": "body"
     }
   ],
@@ -14,13 +12,15 @@
     "categories": {
       "title": "Launcher categories in displayed order",
       "description": "Absent categories will be appended.",
-      "default": ["Favourites",
-                  "Firmware Install",
-                  "Touch - Assessment",
-                  "Touch - Configuration",
-                  "Touch - Development",
-                  "DSDK - Applications",
-                  "Other"],
+      "default": [
+        "Favourites",
+        "Firmware Install",
+        "Device - Assessment",
+        "Device - Configuration",
+        "Device - Development",
+        "DSDK - Applications",
+        "Other"
+      ],
       "type": "array",
       "items": {
         "type": "string"

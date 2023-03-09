@@ -39,9 +39,9 @@ const FW_INSTALL_CATEGORY = 'Firmware Install';
 
 const DOC_LAUNCHER_CATEGORY = 'DSDK - Documentation';
 
-const CONFIG_LAUNCHER_CATEGORY = 'Touch - Config Library';
+const CONFIG_LAUNCHER_CATEGORY = 'Device - Config Library';
 
-const TOUCH_DEVELOPMENT_CATEGORY = 'Touch - Development';
+const DEVICE_DEVELOPMENT_CATEGORY = 'Device - Development';
 
 const redDot = 'radial-gradient(circle at 4px 4px, red, black)';
 
@@ -268,7 +268,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
         kernels.push(console_);
       }
     });
-    categories[TOUCH_DEVELOPMENT_CATEGORY] = kernels;
+    categories[DEVICE_DEVELOPMENT_CATEGORY] = kernels;
 
     for (const cat in categories) {
       categories[cat] = categories[cat].sort(
@@ -286,8 +286,8 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     if (others) {
       delete categories['Other'];
     }
-    categories[TOUCH_DEVELOPMENT_CATEGORY] = categories[
-      TOUCH_DEVELOPMENT_CATEGORY
+    categories[DEVICE_DEVELOPMENT_CATEGORY] = categories[
+      DEVICE_DEVELOPMENT_CATEGORY
     ].concat(others);
 
     const orderedCategories: string[] = [];
