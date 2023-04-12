@@ -7,16 +7,16 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import {
+  LabIcon,
   addIcon,
   classes,
-  closeIcon,
-  LabIcon
+  closeIcon
 } from '@jupyterlab/ui-components';
 import {
   ArrayExt,
   ArrayIterator,
-  each,
   IIterator,
+  each,
   map,
   toArray
 } from '@lumino/algorithm';
@@ -213,7 +213,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     if (webdsService) {
       const osInfo: OSInfo = webdsService.pinormos.getOSInfo();
       updateAvailable =
-        osInfo.repo.version > osInfo.current.version && osInfo.repo.downloaded;
+        osInfo.repo.versionNum > osInfo.current.versionNum && osInfo.repo.downloaded;
       const stashInfo: StashInfo = webdsService.pinormos.getStashInfo();
       stashDataAvailable = stashInfo.dataAvailable;
       testrailOnline = webdsService.pinormos.isTestRailOnline();
