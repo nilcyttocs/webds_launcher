@@ -212,8 +212,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
 
     if (webdsService) {
       const osInfo: OSInfo = webdsService.pinormos.getOSInfo();
-      updateAvailable =
-        osInfo.repo.versionNum > osInfo.current.versionNum && osInfo.repo.downloaded;
+      updateAvailable = osInfo.repo.versionNum > osInfo.current.versionNum;
       const stashInfo: StashInfo = webdsService.pinormos.getStashInfo();
       stashDataAvailable = stashInfo.dataAvailable;
       testrailOnline = webdsService.pinormos.isTestRailOnline();
