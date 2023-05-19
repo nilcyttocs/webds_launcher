@@ -222,7 +222,23 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       [category: string]: ILauncher.IItemOptions[][];
     } = Object.create(null);
 
+    const widgetSet = webdsService!.pinormos.getWidgetSet();
+
     each(this.model.items(), item => {
+      const command = item.command;
+      const args = { ...item.args };
+      const label = this._commands.label(command, args);
+      const category = item.category;
+      if (
+        category !== 'Notebook' &&
+        category !== 'Console' &&
+        category !== 'Other' &&
+        category !== ''
+      ) {
+        if (!widgetSet.has(label)) {
+          return;
+        }
+      }
       const cat = item.category || 'Other';
       if (!(cat in categories)) {
         categories[cat] = [];
