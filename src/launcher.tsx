@@ -293,9 +293,22 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       );
     }
 
-    categories[FAVOURITES_CATEGORY] = this.model.favourites.map(favourite => {
-      return [favourite];
-    });
+    categories[FAVOURITES_CATEGORY] = this.model.favourites
+      .filter(favourite => {
+        const command = favourite.command;
+        const args = { ...favourite.args };
+        const label = this._commands.label(command, args);
+        const category = favourite.category;
+        if (
+          category !== 'Notebook' &&
+          category !== 'Console' &&
+          category !== 'Other' &&
+          category !== ''
+        ) {
+          return widgetSet.has(label);
+        }
+      })
+      .map(favourite => [favourite]);
 
     const others = categories['Other'];
     if (others) {
