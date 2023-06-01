@@ -25,7 +25,12 @@ import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
 import { Widget } from '@lumino/widgets';
-import { OSInfo, StashInfo, WebDSService } from '@webds/service';
+import {
+  ConnectionInfo,
+  OSInfo,
+  StashInfo,
+  WebDSService
+} from '@webds/service';
 
 import { EXTENSION_ID } from './index';
 
@@ -36,6 +41,8 @@ const KERNEL_CATEGORIES = ['Notebook', 'Console'];
 const FAVOURITES_CATEGORY = 'Favourites';
 
 const FW_INSTALL_CATEGORY = 'Firmware Install';
+
+const APPLICATIONS_CATEGORY = 'Applications';
 
 const DOC_LAUNCHER_CATEGORY = 'DSDK - Documentation';
 
@@ -223,6 +230,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     } = Object.create(null);
 
     const widgetSet = webdsService!.pinormos.getWidgetSet();
+    const connectionInfo: ConnectionInfo = webdsService!.pinormos.getConnectionInfo();
 
     each(this.model.items(), item => {
       const command = item.command;
@@ -239,7 +247,27 @@ export class Launcher extends VDomRenderer<LauncherModel> {
           return;
         }
       }
-      const cat = item.category || 'Other';
+      let cat: string;
+      if (connectionInfo.interface === undefined) {
+        if (
+          item.category === 'Notebook' ||
+          item.category === 'Console' ||
+          item.category === 'Other'
+        ) {
+          cat = item.category;
+        } else if (item.category === '') {
+          cat = 'Other';
+        } else if (
+          item.category === DOC_LAUNCHER_CATEGORY ||
+          item.category === CONFIG_LAUNCHER_CATEGORY
+        ) {
+          cat = item.category;
+        } else {
+          cat = 'Applications';
+        }
+      } else {
+        cat = item.category || 'Other';
+      }
       if (!(cat in categories)) {
         categories[cat] = [];
       }
@@ -351,7 +379,9 @@ export class Launcher extends VDomRenderer<LauncherModel> {
           </div>
         </div>
       );
-      cat === FAVOURITES_CATEGORY || cat === FW_INSTALL_CATEGORY
+      cat === FAVOURITES_CATEGORY ||
+      cat === FW_INSTALL_CATEGORY ||
+      cat === APPLICATIONS_CATEGORY
         ? tops.push(section)
         : sections.push(section);
     });

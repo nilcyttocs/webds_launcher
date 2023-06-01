@@ -19,6 +19,7 @@
         "Device - Configuration",
         "Device - Development",
         "DSDK - Applications",
+        "Applications",
         "Other"
       ],
       "type": "array",
