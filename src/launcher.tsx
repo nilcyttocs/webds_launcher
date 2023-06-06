@@ -56,6 +56,7 @@ let webdsService: WebDSService | null;
 let updateAvailable = false;
 let stashDataAvailable = false;
 let testrailOnline = false;
+let checkingConnection = false;
 
 export class LauncherModel extends VDomModel implements ILauncher {
   constructor(
@@ -223,6 +224,16 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       const stashInfo: StashInfo = webdsService.pinormos.getStashInfo();
       stashDataAvailable = stashInfo.dataAvailable;
       testrailOnline = webdsService.pinormos.isTestRailOnline();
+      checkingConnection = webdsService.pinormos.isCheckingConnection();
+    }
+
+    const webdsLauncherElement = document.getElementById('webds_launcher');
+    if (webdsLauncherElement) {
+      if (checkingConnection) {
+        webdsLauncherElement.classList.add('backdrop');
+      } else {
+        webdsLauncherElement.classList.remove('backdrop');
+      }
     }
 
     const categories: {
@@ -399,6 +410,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
         </div>
         <div className="jp-webdsLauncher-shadow jp-webdsLauncher-shadow-top"></div>
         <div className="jp-webdsLauncher-shadow jp-webdsLauncher-shadow-bottom"></div>
+        <div className="jp-webdsLauncher-backdrop"></div>
       </>
     );
   }
