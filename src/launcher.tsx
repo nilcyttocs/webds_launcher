@@ -229,10 +229,11 @@ export class Launcher extends VDomRenderer<LauncherModel> {
 
     const webdsLauncherElement = document.getElementById('webds_launcher');
     if (webdsLauncherElement) {
+      const selector = 'backdrop-' + webdsService!.ui.getJupyterThemeMode();
       if (checkingConnection) {
-        webdsLauncherElement.classList.add('backdrop');
+        webdsLauncherElement.classList.add(selector);
       } else {
-        webdsLauncherElement.classList.remove('backdrop');
+        webdsLauncherElement.classList.remove(selector);
       }
     }
 

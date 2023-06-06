@@ -46,13 +46,22 @@
   box-shadow: 0 -1.2em 1em -1em grey inset;
 }
 
-.jp-webdsLauncher.backdrop .jp-webdsLauncher-backdrop {
+.jp-webdsLauncher.backdrop-light .jp-webdsLauncher-backdrop {
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
   position: absolute;
   background-color: rgba(0, 0, 0, 0.2);
+}
+
+.jp-webdsLauncher.backdrop-dark .jp-webdsLauncher-backdrop {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .jp-webdsLauncher-body {
